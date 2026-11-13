@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Healthcare Provider Directory · Search</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    }
+
+    body {
+      background: #f5f7fc;
+      padding: 1.5rem;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 20px 40px -10px rgba(0, 20, 40, 0.15);
+      padding: 1.8rem 1.8rem 2rem;
+      transition: all 0.2s;
+    }
+
+    h1 {
+      font-size: 1.9rem;
+      font-weight: 600;
+      color: #0b2b4a;
+      margin-bottom: 0.15rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .subhead {
+      color: #4e6b82;
+      font-size: 0.95rem;
+      margin-bottom: 1.8rem;
+      border-left: 4px solid #2b7fc9;
+      padding-left: 0.9rem;
+      background: #eef4fa;
+      border-radius: 0 12px 12px 0;
+      padding: 0.6rem 1rem;
+      display: inline-block;
+    }
+
+    /* search block */
+    .search-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      background: #f0f4fa;
+      padding: 0.9rem 1.4rem;
+      border-radius: 60px;
+      transition: box-shadow 0.2s;
+    }
+
+    .search-wrapper:focus-within {
+      box-shadow: 0 0 0 3px rgba(43, 127, 201, 0.25);
+    }
+
+    .search-icon {
+      font-size: 1.4rem;
+      line-height: 1;
+      color: #2b7fc9;
+      display: flex;
+      align-items: center;
+    }
+
+    #searchInput {
+      flex: 1;
+      min-width: 260px;
+      border: none;
+      background: transparent;
+      font-size: 1.1rem;
+      padding: 0.6rem 0.2rem;
+      outline: none;
+      color: #0b2b4a;
+      font-weight: 500;
+    }
+
+    #searchInput::placeholder {
+      color: #7b95ab;
+      font-weight: 400;
+      font-size: 1rem;
+    }
+
+    .clear-btn {
+      background: #d9e3ed;
+      border: none;
+      border-radius: 40px;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #1d4b6e;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .clear-btn:hover {
+      background: #b8ccde;
+      color: #0a2338;
+    }
+
+    .result-stats {
+      margin-left: auto;
+      font-size: 0.9rem;
+      color: #3e5d77;
+      background: white;
+      padding: 0.35rem 1rem;
+      border-radius: 30px;
+      font-weight: 500;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+      white-space: nowrap;
+    }
+
+    /* table */
+    .table-responsive {
+      overflow-x: auto;
+      border-radius: 18px;
+      border: 1px solid #e2eaf2;
+      background: white;
+      box-shadow: 0 6px 14px rgba(0, 20, 30, 0.03);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      min-width: 1200px;
+    }
+
+    th {
+      background: #1a3a57;
+      color: white;
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      padding: 14px 10px;
+      text-align: left;
+      white-space: nowrap;
+      border-right: 1px solid #2d5170;
+    }
+
+    th:last-child {
+      border-right: none;
+    }
+
+    td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #e6edf5;
+      vertical-align: top;
+      color: #173e5e;
+      background: white;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: #f5faff;
+      transition: background 0.1s;
+    }
+
+    .provider-type {
+      font-weight: 600;
+      color: #0b3a60;
+      white-space: nowrap;
+    }
+
+    .facility-badge {
+      display: inline-block;
+      background: #e1edf9;
+      color: #13446e;
+      padding: 0.25rem 0.6rem;
+      border-radius: 30px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .ha-no {
+      font-family: 'SF Mono', 'Menlo', monospace;
+      font-size: 0.75rem;
+      background: #f0f2f5;
+      padding: 0.2rem 0.5rem;
+      border-radius: 20px;
+      display: inline-block;
+      color: #245c82;
+      font-weight: 500;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 3rem 2rem;
+      background: #fbfdff;
+      border-radius: 18px;
+      color: #54738f;
+      font-size: 1.1rem;
+      font-weight: 500;
+      border: 1px dashed #bbd3e8;
+    }
+
+    .no-results span {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 0.5rem;
+      opacity: 0.6;
+    }
+
+    /* footer */
+    .footer-note {
+      margin-top: 1.5rem;
+      text-align: right;
+      font-size: 0.75rem;
+      color: #7b94aa;
+      border-top: 1px solid #dee8f1;
+      padding-top: 1rem;
+    }
+
+    @media (max-width: 700px) {
+      body { padding: 0.8rem; }
+      .container { padding: 1.2rem; }
+      h1 { font-size: 1.5rem; }
+      .search-wrapper { flex-direction: column; align-items: stretch; border-radius: 30px; }
+      #searchInput { min-width: auto; }
+      .result-stats { margin-left: 0; text-align: center; }
+      .clear-btn { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>
+    <span>🏥</span> Healthcare Provider Directory
+  </h1>
+  <div class="subhead">Dubai · Search across all fields in real time</div>
+
+  <!-- Search bar -->
+  <div class="search-wrapper">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Search by provider, area, facility, HA no, contact…" autofocus>
+    <button class="clear-btn" id="clearBtn" title="Clear search">✕ Clear</button>
+    <div class="result-stats" id="resultStats">44 providers</div>
+  </div>
+
+  <!-- Table container -->
+  <div class="table-responsive" id="tableContainer">
+    <!-- table will be rendered by JavaScript -->
+  </div>
+  <div class="footer-note">Live filtering · all columns searchable</div>
+</div>
+
+<script>
+  // -----------------------------------------------------------------
+  //  RAW DATA (exactly as provided, preserved)
+  // -----------------------------------------------------------------
+  const providerData = [
+    { providerType: "CLINIC", emirates: "DUBAI", area: "AL MANKHOOL", name: "COMMUNITY MEDICAL CENTER", location: "VILLA 02, AL MANKHOOL ROAD, MANKHOOL, DUBAI, PO BOX 8055", contact: "04-3985328", pobox: "8055", facilities: "GP, GYNAECOLOGY, PEDIATRICS,", haNo: "MOH-F-1000934" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "AL RAFFA", name: "ICARE AL REFFA (BR OF EXCEL HEALTHCARE L.L.C)", location: "AL RAFFA C- KHALIFA, JUMA SAEED AL, NABBODA, AL REFFA.", contact: "05904903", pobox: "25030", facilities: "", haNo: "DHA-F-0002275" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "AL RAFFA", name: "RALS HEALTHCARE (BR OF ABD ULWAHED BIN SHABIB INVESTMENT GROUP L.L.C) (PREV. NOORA POLYCLINIC)", location: "IT CENTER BUILDING, 21 A STREET, AL SOUQ AL KABEER, NEXT TO AL RAFFA POLICE STATION, BUR DUBAI, DUBAI, PO BOX 11370", contact: "04-2275777; 8007257", pobox: "11370", facilities: "GP", haNo: "DHA-F-0002053" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "BUR DUBAI", name: "ABRIS MEDICAL CENTRE LLC", location: "FIRST FLOOR SOUQ AL KABEER BUILDING,MEENA BAZAAR,OPPOSITE DUBAI MUSEUM,BUR DUBAI,DUBAI", contact: "04-3535356", pobox: "242870", facilities: "GP AND DENTIST", haNo: "DHA-F-0046977" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "BUR DUBAI", name: "ACCESS CLINIC BUR DUBAI BR OF DM HEALTHCARE LLC", location: "SOUK AL KABEER BUILDING, GROUND FLOOR , NEXT TO BUS STATION , BUR DUBAI, DUBAI UAE", contact: "04-3527300", pobox: "8703", facilities: "GP, ORTHOPEDIC, INTERNAL MEDICINE, PAEDIATRICS, GYNECOLOGY, ENT, OPHTHALMOLOGY, GENERAL SURGEON, ORTHODONTICS, DENTISTRY, PHYSIOTHERAPY, LAB, X-RAY, USG", haNo: "DHA-F-5522418" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "BUR DUBAI", name: "AL MANSOOR MEDICAL CENTER", location: "101,MOOSA BUILDING,AL MUSALLA RD,OPPOSITE TO K.P MART,BUR DUBAI", contact: "04-3554040", pobox: "43136", facilities: "GP", haNo: "DHA-F-4282673" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "BUR DUBAI", name: "AL MUNIRA CLINIC", location: "FLAT NO. 201, OPP. ASCOT HOTEL, ABOVE LIFE PHARMACY KHALID BIN WALID ST., BUR DUBAI, DUBAI, UAE", contact: "04-3522813", pobox: "51561", facilities: "GP,", haNo: "DHA-F-3512610" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "BUR DUBAI", name: "AL RAHA CLINIC - DUBAI", location: "NBAD BUILDINGS, B BLOCK, 5TH FLOOR, FLAT NO.5", contact: "04-3517272", pobox: "25676", facilities: "GP, OB-GYNE", haNo: "DHA-F-0047057" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "BUR DUBAI", name: "AL RASHIDIYA PVT.POLYCLINIC", location: "RTA MULTI STORY PARKING BUILDING 2ND FLOOR, OPP. AMBASSADOR HOTEL, AL FALAH ST., BUR DUBAI, DUBAI, UAE", contact: "04-3939383", pobox: "51507", facilities: "GP, DENTIST", haNo: "DHA-F-0002347" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "BUR DUBAI", name: "AL SHIFA INTERNATIONAL CLINIC (PREVIOUSELY DR. MOHAN CLINIC)", location: "101 AL SHAMALI BUILDING, MEENA BAZAAR, OPP. KFC, ABOVE REGAL TEXTILE, AL FAHID ST. BUR DUBAI, DUBAI, UAE", contact: "04-3972999", pobox: "51368", facilities: "GP,ORTHOPEDIC SURGEON,INTERNAL MEDICINE,OTOLARYNGOLOGY,SURGEON", haNo: "DHA-F-3006003" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "BUR DUBAI", name: "ASHTREE CLINIC LLC (PREIOUSLY AMALA1 MEDICAL CENTER LLC)", location: "OPP.TO.ASTORIA HOTEL", contact: "04-3533414", pobox: "50353", facilities: "GENERAL PRACTITIONER", haNo: "DHA-F-5739289" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "BUR DUBAI", name: "BADR AL SAMAA MEDICAL CENTRE", location: "301 KHALID BIN AL WALEED ROAD,AL MANKHOUL, DUBAI", contact: "04-3578681", pobox: "125035", facilities: "GENERAL PRACTITIONER", haNo: "DHA-F-0001768" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "BUR DUBAI", name: "DR. PRAVINKUMAR CLINIC", location: "101 AKEEL MUSTAFA MOHD BLDG. AL RAFA AREA, OPP. ASTORIA HOTEL, DUBAI, UAE", contact: "04-3534484", pobox: "3267", facilities: "GP,RADIOLOGY,GP DENTIST,ORTHOPEDIC SURGERY", haNo: "DHA-F-0046440" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "BUR DUBAI", name: "FALCON MEDICAL CLINIC", location: "MEENA BUILDING, 302 FLAT, AL SOUQ AL KABEER, 316 IBRAHIM JUM AAL REDHA, BUR DUBAI, PO BOX 11370", contact: "04-2102894", pobox: "11370", facilities: "GENERAL PRACTITIONER", haNo: "DHA-F-0047100" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "BUR DUBAI", name: "GETWELL MEDICAL CENTRE", location: "BANK STREET, NEXT TO HABIB BANK, BUR DUBAI", contact: "04-3595935", pobox: "31690", facilities: "GP", haNo: "DHA-F-0047403" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "BUR DUBAI", name: "GSM MEDICAL CENTRE LLC", location: "GROUND FLOOR, NML DUBAI CREEK RESIDENCE, AL HAMRIYA, BUR DUBAI, DUBAI", contact: "04-2349799", pobox: "473510", facilities: "GP, CARDIOLOGY, GYNAECOLOGY, DENTIST, PHYSIOTHERAPIST", haNo: "DHA-F-0045700" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "BUR DUBAI", name: "HARLEY INTERNATIONAL MEDICAL CLINIC", location: "D-103, NASHWAN BUILDING, MANKHOOL ROAD, DUBAI", contact: "04-3986677", pobox: "34801", facilities: "GP, DERMATOLOGY, PHYSIO,", haNo: "DHA-F-0046698" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "BUR DUBAI", name: "HARLEY INTERNATIONAL MEDICAL CLINIC_BRANCH", location: "NASHWAN BUILDING,3RD FLOOR,MANKHOOL ROAD,DUBAI,UAE", contact: "04-3986677", pobox: "34801", facilities: "PEDIATRIAN,DERMATOLOGY,GP,UROLOGY,INTERNAL MEDICINE,DENTIST,HOMEOPATHY,CARDIOLOGY,ORTHODONTICS,IMPLANTOLOGIST", haNo: "DHA-F-0002118" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "BUR DUBAI", name: "ICARE BLUE CLINIC BURDUBAI (FORMERLY COSMOPOLITAN MEDICAL CENTRE LLC)", location: "MEZZANINE FLOOR,AL FADHLANI BUILDING ,NEXT TO ASTORIA HOTEL", contact: "04-5904903", pobox: "45093", facilities: "CARDIOLOGIST,PEADIATRICIAN,ORTHODONTIST,GP AND", haNo: "DHA-F-9515583" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "BUR DUBAI", name: "JANSONS MEDICAL CENTRE", location: "M-FLOOR KHYBER BLDG. OPP. AL RAFFAH POLICE STATION, AL RAFFAH ROAD, BURDUBAI", contact: "04-3939011", pobox: "121574", facilities: "", haNo: "DHA-F-2088217" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "BUR DUBAI", name: "KARAMA MEDICAL CENTRE BR BURJUMAN", location: "3RD FLOOR, IBRAHIM KHALIFA BUILIDING, 45 B STREET OPP TO KARAMA BUS STATION - DUBAI", contact: "04-3533008", pobox: "52001", facilities: "GP, OPTHALMOLOGY, NEURO, DERMA,PATHOLOGIST,DENTIST, HOMEOPATHY, AYURVEDA", haNo: "DHA-F-3768199" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "BUR DUBAI", name: "LIVERPOOL MEDICAL CLINIC", location: "AMIN FALAKNAZ BUILDING, AL RAFFA, BUR DUBAI, DUBAI, UAE", contact: "04-3379541", pobox: "7335", facilities: "", haNo: "DHA-F-0000992" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "BUR DUBAI", name: "NEEKO POLYCLINIC L.L.C", location: "MOSTAFAWI BUSINESS CENTER, NEAR SHARAF DG METRO STATION EXIT-1, BUR DUBAI, DUBAI, UAE", contact: "04-3359025", pobox: "0", facilities: "GP,GYN", haNo: "DHA-F-0047965" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "BUR DUBAI", name: "PAKISTAN MEDICAL CENTRE", location: "STREET 12, PAKISTAN ASSOCIATION DUBAI, 11TH STREET, OUD METHA, BUR DUBAI, DUBAI", contact: "04-2305000", pobox: "426", facilities: "GP, ORTHOPEDICS", haNo: "DHA-F-0002126" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "BUR DUBAI", name: "VIDA CLINIC LLC", location: "39B, MEZZANINE FLOOR, AL RAIS SHOPPING CENTRE,ROLLA STREET, BUR DUBAI, UAE", contact: "04-3252525", pobox: "117751", facilities: "GP", haNo: "DHA-F-0000786" },
+    { providerType: "DIAGNOSTIC CENTER", emirates: "DUBAI", area: "AL FAHIDI", name: "MEDINOVA DIAGNOSTIC CENTRE", location: "NEAR AL FAHIDI METRO STATION, KHALID BIN AL WALEED ROAD, BURDUBAI, DUBAI UAE", contact: "04-4400500", pobox: "8703", facilities: "LAB", haNo: "MF2282" },
+    { providerType: "DIAGNOSTIC CENTER", emirates: "DUBAI", area: "AL KARAMA", name: "BIOHEALTH DIAGNOSTIC CENTER (PREV. BIOHEALTH LABS)", location: "ARIF AND BITAOK BUILDING, AL KARAMA, DUBAI, PO BOX 52001", contact: "04-3335502", pobox: "52001", facilities: "LABORATORY", haNo: "MF7456" },
+    { providerType: "DIAGNOSTIC CENTER", emirates: "DUBAI", area: "BUR DUBAI", name: "IDEAL DIAGNOSTIC CENTER", location: "NEAR BURJUMAN METRO STATION, EXIT NO. 4, OPP. BURJUMAN CENTER, BANK STREET (SAME BUILDING MASHREQ BANK), KHALID BIN WALEED STREET, BUR DUBAI, DUBAI", contact: "04-3979255", pobox: "113951", facilities: "LABORATORY", haNo: "MOH-F-1000618" },
+    { providerType: "DIAGNOSTIC CENTER", emirates: "DUBAI", area: "BUR DUBAI", name: "MEDSOL AL ABBAR LABORATORIES FOR RESEARCH & MEDICAL ANALYSIS LLC", location: "OFFICE 501, UBL BANK BLDG., BUR DUBAI, DUBAI, UAE, PO BOX 2547", contact: "04-3592641", pobox: "2547", facilities: "LABORATORY", haNo: "MOH-F-1000782" },
+    { providerType: "DIAGNOSTIC CENTER", emirates: "DUBAI", area: "BUR DUBAI", name: "MEGA SCAN CENTRE", location: "M FLR, ATRIUM CENTRE, KHALED BIN AL WALEED STREET, BURDUBAI", contact: "04-3585888", pobox: "32886", facilities: "RADIOLOGY", haNo: "DHA-F-6179400" },
+    { providerType: "DIAGNOSTIC CENTER", emirates: "DUBAI", area: "BUR DUBAI", name: "PH DIAGNOSTICS LLC", location: "AL ABBAS BUILDING-1 FLOOR, KHALID BIN WALEED ST., OPP. NBQ, NEAR BURJUMAN METRO, BUR DUBAI, UAE", contact: "04-3543350", pobox: "124202", facilities: "LABORATORY", haNo: "DHA-F-0000605" },
+    { providerType: "DIAGNOSTIC CENTER", emirates: "DUBAI", area: "BUR DUBAI", name: "STAR METROPOLIS CLINICAL LABORATORIES & HEALTH SERVICES MIDDLE EAST", location: "8TH FLOOR,FLAT NO. 802-803,AL MUSALLAH TOWER,BUR DUBAI", contact: "04-3231647", pobox: "81834", facilities: "RADIOLOGY", haNo: "DHA-F-3650734" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "AL FAHIDI", name: "SULTAN PHARMACY LLC", location: "SHOP NO. 5-6 FADHLANI BUILDING, AL ESBIJ ST, NEAR ASTORIA HOTEL, AL FAHIDI, DUBAI", contact: "04-3945392", pobox: "19382", facilities: "", haNo: "DHA-F-0001237" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "AL KARAMA", name: "AL JUMA PHARMACY (BR OF ASTER PHARMACIES GROUP L.L.C)", location: "OPP. TO LULU CENTRE - KARAMA", contact: "04-3348981", pobox: "50585", facilities: "", haNo: "DHA-F-0280977" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "AL KARAMA", name: "ASTER PHARMACY 138 (BR OF ASTER PHARMACIES GROUP L.L.C)", location: "GROUND FLOOR, AL JABAR BUILDING, NEAR SUNRISE SUPERMARKET, AL KARAMA, DUBAI", contact: "04-3377329", pobox: "50585", facilities: "", haNo: "DHA-F-4207640" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "AL KARAMA", name: "ASTER PHARMACY 145(BR OF ASTER PHARMACIES GROUP L.L.C)", location: "SHOP NO: 1, AL WALEED BUILDING. OPP. UNION MEDICAL CENTRE, IRANIAN SCHOOL ROAD, KARAMA", contact: "04-3547745", pobox: "50585", facilities: "", haNo: "DHA-F-5689335" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "AL KARAMA", name: "MEDICOM PHARMACY 13 (BR OF ASTER PHARMACIES GROUP L.L.C)", location: "OPPOSTIE :- KARAMA CENTRE, KARAMA, DUBAI", contact: "04-3977739", pobox: "50585", facilities: "", haNo: "DHA-F-0002470" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "AL KARAMA", name: "SARA PHARMACY L.L.C (BR OF ASTER AL SHAFAR PHARMACIES GROUP L.L.C)", location: "SPINNEYS, KARAMA", contact: "04-3593330", pobox: "50585", facilities: "", haNo: "DHA-F-8804676" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "AL MANKHOOL", name: "APOTEC RAFA PHARMACY L L C", location: "AL RAIS CENTRE BUILDING, SHOP NO G05, NEXT TO CHOITHRAM SUPERMARKET, AL RAFFA, AL MANKHOOL ROAD, DUBAI, UAE", contact: "04-3365956", pobox: "124898", facilities: "", haNo: "DHA-F-0047166" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "AL MANKHOOL", name: "APOTEC UNIQUE PHARMACY L.L.C", location: "MEZZANINE FLOOR, UW MALL NEXT TO BURJUMAN CENTER, AL MANKHOOL, DUBAI, UAE", contact: "04-2656070", pobox: "124898", facilities: "", haNo: "DHA-F-6382248" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "AL MANKHOOL", name: "ASTER DAY SURGERY CENTRE PHARMACY LLC", location: "KUWAIT STREET, MANKHOOL AL YATEEM BUILDING BUR DUBAI", contact: "04-4400500", pobox: "8703", facilities: "", haNo: "DHA-F-0047831" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "AL MANKHOOL", name: "ASTER HOSPITAL PHARMACY BR ASTER DM HEALTHCARE FZC DUBAI BRANCH", location: "KUWAIT STREET, MANKHOOL, NEXT TO SHARAF DG, BUR DUBAI", contact: "04-4546001", pobox: "8703", facilities: "", haNo: "DHA-F-0046522" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "AL MANKHOOL", name: "NEW MANKHOOL PHARMACY LLC", location: "GROUND FLOOR, AL ATTAR APARTMENT, NEAR SUNRIES SUPERMARKET, AL KARAMA, DUBAI", contact: "04-3377329", pobox: "123047", facilities: "", haNo: "DHA-F-0046630" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "AL RAFFA", name: "ASTER AL HAYAT PHARMACY (BR OF ASTER PHARMACIES GROUP L.L.C)", location: "SHOP NO 3,EASA SALEH AL GURG BUILDING,NEAR TO AL ADIL SUPER MARKET, ROLLA STREET,BURDUBAI", contact: "04-3552633", pobox: "50585", facilities: "", haNo: "DHA-F-0002321" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "AL RAFFA", name: "ASTER PHARMACY 112 (BR OF ASTER PHARMACIES GROUP L.L.C)", location: "MOHAMED KHLIFA AL KHALAFI BUILDING, GROUND FLOOR,ROLLA STREET, AL RAFFA, BURDUBAI", contact: "04-3252920", pobox: "50585", facilities: "", haNo: "DHA-F-0046297" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "AL RAFFA", name: "RALS HEALTHCARE BR OF ABD ULWAHED BIN SHABIB INVESTMENT GROUP LLC (PREV BLUE LIFE PHARMACY (BRANCH)", location: "IT CENTER BUILDING, 21 A STREET, AL SOUQ AL KABEER, NEXT TO AL RAFFA POLICE STATION, BUR DUBAI, DUBAI, PO BOX 11370", contact: "04-2275777; 8007257", pobox: "11370", facilities: "", haNo: "DHA-F-9504539" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "AL RAFFA", name: "VIDA PHARAMCY LLC", location: "SHOP 14, AL RAIS SHOPPING CENTRE, AL RAFFA, DUBAI, UAE", contact: "0502137686", pobox: "0", facilities: "", haNo: "DHA-F-0048018" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "AL ANBER PHARMACY", location: "KHALID BIN AL WALEED ROAD", contact: "04-3973396", pobox: "51659", facilities: "", haNo: "DHA-F-2758201" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "AL DEWAN PHARMACY - DUBAI", location: "AL FAHIDI STREET, NEAR DUBAI MUSEUM, BUR DUBAI, DUBAI, UAE", contact: "04-3530099", pobox: "39803", facilities: "", haNo: "DHA-F-1716570" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "AL FEHAIDI PHARMACY", location: "OPP. DUBAI NOVA HOTEL, AL FEHADI STREET, BUR DUBAI", contact: "04-3535335", pobox: "57213", facilities: "", haNo: "DHA-F-0046629" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "AL GHUBAIBA PHARMACY", location: "NEXT TO AL GHUBAIBA BUS STATION,OPP.SHINDAGHA ETISALAT,BUR DUBAI,DUBAI", contact: "04-3266042", pobox: "125388", facilities: "", haNo: "DHA-F-0318079" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "AL KAUSAR PHARMACY", location: "KHALID BIN AL WALEED ROAD,NEXT TO PALM BEACH HOTEL, BURDUBAI", contact: "04-3938485", pobox: "116690", facilities: "", haNo: "DHA-F-4162689" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "AL RAFAH PHARMACY", location: "NEXT TO TAXI STAND,BURDUBAI", contact: "04-3939402", pobox: "61640", facilities: "", haNo: "DHA-F-3019118" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "AL RAIS PHARMACY", location: "AL RAIS CENTRE, AL MANKHOOL ROAD", contact: "04-3519581", pobox: "5249", facilities: "", haNo: "DHA-F-0045834" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "AREEJ PHARMACY", location: "BUR DUBAI", contact: "04-3522299", pobox: "41725", facilities: "", haNo: "DHA-FL-0045141" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "ASH TREE PHARMACY LLC", location: "AL BALOOCH BUILDING, AL RAFFA POLICE STATION ROAD, BUR DUBAI, DUBAI, UAE", contact: "04-3337633", pobox: "47090", facilities: "", haNo: "DHA-F-0045840" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "ASIA PHARMACY LLC", location: "OPP.AL FAHEDI STREET, NEXT TO CHOITHRAM", contact: "04-3527183", pobox: "381", facilities: "", haNo: "DHA-F-0000585" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "ASTER PHARMACY 146(BR OF ASTER PHARMACIES GROUP LLC)", location: "SOUK AL KABEER BUILDING, GROUND FLOOR , NEXT TO BUS STATION , BUR DUBAI, DUBAI UAE", contact: "04-3271059", pobox: "50585", facilities: "", haNo: "DHA-F-0046486" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "BADR AL SAMAA PHARMACY LLC", location: "301 KHALID BIN AL WALEED ROAD,AL MANKHOUL, DUBAI", contact: "04-3578681", pobox: "125035", facilities: "", haNo: "DHA-F-0045995" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "BURJUMAN PHARMACY LLC", location: "GROUND FLOOR, KHALID BIN AL WALID STREET, INSIDE BURJUMAN CENTER, BUR DUBAI", contact: "04-3387616", pobox: "71246", facilities: "", haNo: "DHA-F-0047536" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "C C S LIFE PHARMACY BR OF LIFE PHARMACY", location: "UNIT NO. 2, GROUND FLOOR, SHINDAGHA CITY CENTRE, BUR DUBAI, DUBAI", contact: "04-5610000", pobox: "71246", facilities: "", haNo: "DHA-F-0046478" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "COUNTRY PHARMACY CO (L.L.C)", location: "AL FAHIDI STREET", contact: "04-3536689", pobox: "11476", facilities: "", haNo: "DHA-F-0002188" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "ERADA PHARMACY LLC", location: "NEAR GUBAIBA BUS STATION, SOUQ AL KABEER, BUR DUBAI", contact: "04-2635752", pobox: "19020", facilities: "", haNo: "DHA-F-0045773" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "GALLERIA UNITED PHARMACY(BR OF UNITED PHARMACY INVESTMENT LLC)", location: "SHOP NO: 13, (SHEIKHA HIND BIN MAKTOUM BIN JUMA AL MAKTOUM) GALLERIA MALL, NEXT TO JUMEIRAH POST OFFICE, BUR DUBAI, AL WASL ROAD", contact: "04-5610000", pobox: "71246", facilities: "", haNo: "DHA-F-0001661" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "GRAND AL KAUSAR PHARMACY", location: "KHALID BIN WALID, AL FARDAN BLDG. BUR DUBAI, DUBAI, UAE", contact: "04-3511406", pobox: "116690", facilities: "", haNo: "DHA-F-0047947" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "GSM GREENS PHARMACY L.L.C", location: "GROUND FLOOR, NML DUBAI CREEK RESIDENCE, AL HAMRIYA, BUR DUBAI, DUBAI", contact: "04-8831002", pobox: "473510", facilities: "", haNo: "DHA-F-0001901" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "HARLEY INTERNATIONAL MEDICAL CLINIC PHARMACY BRANCH", location: "303, 3RD FLOOR, D BLOCK, NASHWAN BUILDING, AL MANKHOOL, BUR DUBAI, DUBAI, UAE", contact: "04-3986677", pobox: "34801", facilities: "", haNo: "DHA-F-0002515" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "HEALTH FIRST PHARMACY 34", location: "SHOP NO.3, IBRAHIM BIN ABDULRAHIM QASSEM BLDG., AL HAMRIYA, MUSALLA ROAD, BUR DUBAI, DUBAI, UAE", contact: "04-3852791", pobox: "87150", facilities: "", haNo: "DHA-F-0045797" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "HEALTH FIRST PHARMACY 38", location: "SALEH BIN LAHEJ BUILDING 338, OUD METHA, LAMCY PLAZA, BUR DUBAI, DUBAI, UAE", contact: "04-3960695", pobox: "87150", facilities: "", haNo: "DHA-F-9577969" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "INTERNATIONAL MODERN HOSPITAL PHARMACY", location: "PORT RASHID ROAD, A MANKHOOL AREA, BUR DUBAI, DUBAI", contact: "04-4063521", pobox: "121735", facilities: "", haNo: "DHA-F-0000940" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "JANSONS PHARMACY", location: "KHYBER BUILDING, GROUND FLOOR, SHOP 4, AL RAFAH POLICE STATION BUR DUBAI, DUBAI, UAE", contact: "04-3514118", pobox: "121574", facilities: "", haNo: "DHA-F-0046996" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "LIFE AL HAMRIYA BR OF LIFE PHARMACY LLC", location: "UNIT A, GROUND FLOOR, FATHIMA HYPERMARKET, KHALID BIN AL WALEED RD., BUR DUBAI", contact: "04-3571148", pobox: "71246", facilities: "", haNo: "DHA-F-3758961" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "LIFE PHARMACY 78 BR OF LIFE PHARMACY LLC", location: "SHOP NO: 1, SOUK AL KABEER BUILDING, PLOT NO: 312-1040, NEXT TO BUR DUBAI BUS STATION, DUBAI, UAE", contact: "04-5718063", pobox: "71246", facilities: "", haNo: "DHA-F-4658212" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "LIVERPOOL PHARMACY LLC", location: "AMIN FALAKNAZ BUILDING, AL RAFFA, BUR DUBAI, DUBAI, UAE", contact: "04-3379541", pobox: "7611", facilities: "", haNo: "DHA-F-0001242" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "LIWA PHARMACY", location: "AL MANKHOOL, DUBAI", contact: "04-3558898", pobox: "71246", facilities: "", haNo: "DHA-F-0001148" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "MEDLIFE PHARMACY", location: "SHOP NO.7&8, NEAR ASTORIA HOTEL, BUR DUBAI, DUBAI, UAE", contact: "04-3539755", pobox: "39803", facilities: "", haNo: "DHA-F-0001240" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "MODERN PHARMACY LLC - BRANCH (PREV. THUMBAY PHARMACY 5 BRANCH OF THUMBAY PHARMACY LLC)", location: "AL ESBIJI ST. AQIL MUSTAFA ABDUL AL NOOR, NEAR ASTORIA HOTEL,", contact: "04-3539755", pobox: "39803", facilities: "", haNo: "DHA-F-0000543" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "MUSALLA TOWER PHARMACY", location: "MUSALLA TOWER MALL, MEZZANINE FLOOR, RAMADA SIGNAL BURDUBAI, DUBAI, UAE", contact: "04-3964118", pobox: "26238", facilities: "", haNo: "DHA-F-0002040" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "NEW GRAND 1 PHARMACY", location: "KHALID BIN WALID ROAD, DUBAI", contact: "04-3518474", pobox: "71246", facilities: "", haNo: "DHA-F-4001816" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "NEW HEALTH SIGN PHARMACY LLC", location: "SHOP NO.2, BOOKASH BUILDING, NEAR ASTORIA HOTEL, BUR DUBAI, UAE", contact: "04-3208755", pobox: "9360", facilities: "", haNo: "DHA-F-8557893" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "RALS HEALTHCARE (BR OF ABDULWAHED BIN SHABIB INVESTMENT GROUP LLC) (PREV. BLUE LIFE PHARMACY)", location: "MEENA BUILDING, 302 FLAT, AL SOUQ AL KABEER, 316 IBRAHIM JUM AAL REDHA, BUR DUBAI, PO BOX 11370", contact: "04-2275777", pobox: "11370", facilities: "", haNo: "DHA-F-0046351" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "RAMADA LIFE PHARMACY L L C", location: "NEAR HOTEL RAMADA, BUR DUBAI", contact: "04-3528104", pobox: "71246", facilities: "", haNo: "DHA-FL-0044763" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "REAL ONE PHARMACY L.L.C", location: "SHP # 1&2 AL BALOOCH BLDG, NEAR ALRAFA POLICE ST, BUR DUBAI", contact: "04-3887704", pobox: "71246", facilities: "", haNo: "DHA-F-4536814" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "ROYAL PHARMACY(LLC)", location: "KHALID BIN WALID WALID ROAD, OPP. HOTEL ASCOT", contact: "04-3522426", pobox: "71246", facilities: "", haNo: "DHA-F-0047147" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "SANJEEVANI PHARMACY LLC", location: "SHOP NO. 5,MEENA BUILDING,NEAR AL FAHIDI SOUQ,BUR DUBAI,DUBAI", contact: "04-3862999", pobox: "114855", facilities: "", haNo: "DHA-F-0000666" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "SUPERCARE MANKHOOL PHARMACY", location: "NASHWAN BUILDING, MANKHOOL ROAD, BUR DUBAI", contact: "04-3989092", pobox: "118347", facilities: "", haNo: "DHA-F-3139740" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "SUPERCARE PHARMACY 43", location: "BURJUMAN MALL, DUBAI", contact: "04-3256464", pobox: "118347", facilities: "", haNo: "DHA-F-6161076" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "THUMBAY PHARMACY 3 BRANCH OF THUMBAY PHARMACY LLC", location: "MOHAMED SADIQ HUSSAIN BLDG. AL FAHIDI BURDUBAI", contact: "04-3530099", pobox: "1885", facilities: "", haNo: "DHA-F-0047943" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "UNICARE PHARMACY", location: "23 NORTH WING BURJUMAN CENTRE, DUBAI, UAE", contact: "04-3599523", pobox: "113343", facilities: "", haNo: "DHA-F-0000330" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "WESTON PHARMACY LLC", location: "BUILDING NO. 214,SHOP NO. 3,ABDULLAH KHOORY BUILDING,SUQ AL KABEER,BUR DUBAI,DUBAI", contact: "04-2652767", pobox: "43136", facilities: "", haNo: "DHA-F-0045762" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BUR DUBAI", name: "ZULEKHA PHARMACY LLC", location: "NEAR AL RAFA POLICE STATION", contact: "04-3934757", pobox: "381", facilities: "", haNo: "DHA-F-0001929" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BURJUMAN", name: "GOLDEN SANDS PHARMACY (BR OF ASTER PHARMACIES GROUP L.L.C)", location: "AL AIN CENTRE - BUR DUBAI", contact: "04-3511444", pobox: "50585", facilities: "", haNo: "DHA-F-0001885" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BURJUMAN", name: "YACOUB PHARMACY (BR OF ASTER PHARMACIES GROUP L.L.C)", location: "KHALID BIN WALEED ROAD, NEAR TO ADCB BANK, BANK STREET,BUR DUBAI", contact: "04-3523332", pobox: "50585", facilities: "", haNo: "DHA-F-0045829" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BURJUMAN", name: "CWH PHARMACY LLC BRANCH", location: "SHOP NO G1002, GROUND FLOOR, KHALID BIN AL WALEED ROAD, BURJUMAN CENTRE, DUBAI, UAE", contact: "04-3865376", pobox: "9398", facilities: "", haNo: "DHA-F-0048005" },
+    { providerType: "PHARMACY", emirates: "DUBAI", area: "BURJUMAN", name: "HEALTH & GLOW PHARMACY L.L.C", location: "FIRST FLOOR, BURJUMAN CENTRE 2, BURJUMAN MALL, DUBAI, UAE", contact: "04-5610000", pobox: "71246", facilities: "", haNo: "DHA-F-0001686" },
+    { providerType: "DAY CARE CENTER", emirates: "DUBAI", area: "AL MANKHOOL", name: "ASTER DAY SURGERY CENTRE LLC", location: "KUWAIT STREET, MANKHOOL AL YATEEM BUILDING BUR DUBAI", contact: "04-4400500", pobox: "", facilities: "", haNo: "" },
+    { providerType: "HOSPITAL", emirates: "DUBAI", area: "AL MANKHOOL", name: "ASTER HOSPITAL BR OF ASTER DM HEALTHCARE FZC DUBAI", location: "KUWAIT STREET, MANKHOOL, NEXT TO SHARAF DG, BUR D", contact: "04-546003; 04-440050", pobox: "", facilities: "", haNo: "" },
+    { providerType: "HOSPITAL", emirates: "DUBAI", area: "BUR DUBAI", name: "INTERNATIONAL MODERN HOSPITAL - DUBAI", location: "PORT RASHID ROAD, A MANKHOOL AREA, BUR DUBAI, DUBAI", contact: "04-4063000", pobox: "", facilities: "", haNo: "" },
+    { providerType: "HOSPITAL", emirates: "DUBAI", area: "BURJUMAN", name: "MEDEOR 24X7 HOSPITAL", location: "EMBASSY DISTRICT, UMM HURAIR-1, SHEIKH KHALIFA BIN ZAYED STREET, DUBAI, UAE", contact: "04-3500600", pobox: "", facilities: "", haNo: "" },
+    { providerType: "DENTAL CLINIC", emirates: "DUBAI", area: "SHEIKH ZAYED ROAD", name: "MANAL HARB MEDICAL CENTER L.L.C (PREVIOUSLY MOUAFFAQ BRIGHT TEETH CLINIC)", location: "OFFICE 3001 30TH FLOOR SHEIKH ZAID ROAD, AL ATTAR TOWER", contact: "04-3251222", pobox: "123200", facilities: "", haNo: "" },
+    { providerType: "CLINIC", emirates: "DUBAI", area: "BUR DUBAI", name: "NEEKO POLYCLINIC L.L.C", location: "MOSTAFAWI BUSINESS CENTER, NEAR SHARAF DG METRO STATION EXIT-1, BUR DUBAI, DUBAI, UAE", contact: "04-3359025", pobox: "", facilities: "", haNo: "" }
+  ];
+
+  // Table columns (order matches display)
+  const columns = [
+    { key: 'providerType', label: 'PROVIDER TYPE' },
+    { key: 'emirates', label: 'EMIRATES' },
+    { key: 'area', label: 'AREA' },
+    { key: 'name', label: 'NAME OF THE PROVIDER' },
+    { key: 'location', label: 'LOCATION' },
+    { key: 'contact', label: 'CONTACT NUMBER' },
+    { key: 'pobox', label: 'PO.BOX' },
+    { key: 'facilities', label: 'FACILITIES/SPECIALTIES' },
+    { key: 'haNo', label: 'HA REG NO' }
+  ];
+
+  // DOM elements
+  const searchInput = document.getElementById('searchInput');
+  const clearBtn = document.getElementById('clearBtn');
+  const tableContainer = document.getElementById('tableContainer');
+  const resultStats = document.getElementById('resultStats');
+
+  // Helper: safe string conversion, empty for null/undefined
+  function safe(val) {
+    return (val === null || val === undefined) ? '' : String(val);
+  }
+
+  // Function to render the table for a given array of items
+  function renderTable(items) {
+    // Update stats
+    resultStats.textContent = `${items.length} provider${items.length !== 1 ? 's' : ''}`;
+
+    if (items.length === 0) {
+      tableContainer.innerHTML = `<div class="no-results"><span>🔍</span> No providers match your search. Try a different keyword.</div>`;
+      return;
+    }
+
+    // Build table HTML
+    let html = `<table>
+      <thead>
+        <tr>
+          ${columns.map(col => `<th>${col.label}</th>`).join('')}
+        </tr>
+      </thead>
+      <tbody>`;
+
+    items.forEach(row => {
+      html += '<tr>';
+      columns.forEach(col => {
+        let cellValue = safe(row[col.key]);
+        // Optional: beautify HA number display, but we keep as is
+        if (col.key === 'haNo' && cellValue) {
+          cellValue = `<span class="ha-no">${cellValue}</span>`;
+        } else if (col.key === 'providerType') {
+          cellValue = `<span class="provider-type">${cellValue}</span>`;
+        } else if (col.key === 'facilities' && cellValue.trim() !== '') {
+          // Lightly style facility list
+          cellValue = `<span class="facility-badge">${cellValue}</span>`;
+        }
+        html += `<td>${cellValue}</td>`;
+      });
+      html += '</tr>';
+    });
+
+    html += `</tbody></table>`;
+    tableContainer.innerHTML = html;
+  }
+
+  // Filter function: search across all keys of each item
+  function filterData(query) {
+    if (!query.trim()) {
+      renderTable(providerData);
+      return;
+    }
+
+    const lowerQuery = query.trim().toLowerCase();
+
+    const filtered = providerData.filter(item => {
+      // Combine all fields into one searchable string
+      return Object.values(item).some(val => {
+        return safe(val).toLowerCase().includes(lowerQuery);
+      });
+    });
+
+    renderTable(filtered);
+  }
+
+  // Initial render
+  renderTable(providerData);
+
+  // Event: live search
+  searchInput.addEventListener('input', (e) => {
+    filterData(e.target.value);
+  });
+
+  // Clear search
+  clearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    filterData('');
+    searchInput.focus();
+  });
+
+  // Optional: search on Enter (not needed but prevents accidental form behavior)
+  searchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+    }
+  });
+
+  // Add small highlight for search (optional, but not needed)
+</script>
+</body>
+</html>
